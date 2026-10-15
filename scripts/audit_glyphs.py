@@ -1,25 +1,4 @@
 #!/usr/bin/env python3
-"""Find and remove corrupted samples in the glyph library.
-
-    python scripts/audit_glyphs.py          # report only
-    python scripts/audit_glyphs.py --fix    # quarantine the bad ones
-
-The library teaches itself, so a sample stored under the wrong letter is
-permanent and quietly poisons the structural gate from then on. The gate lets a
-candidate through if *any* stored sample of that letter matches on hole count
-and aspect ratio, so one narrow glyph filed under G is enough for G to start
-matching narrow glyphs — which is how VINEGAR came to read as VGNEGAR.
-
-A letter's samples normally agree closely: every G has one hole-free shape at
-roughly 0.78 aspect, every I is a bar near 0.2. So an outlier is detectable
-without knowing what the letter should look like — it simply disagrees with its
-own siblings. Letters whose shape genuinely varies are protected by requiring a
-clear majority before anything is called an outlier.
-
-Removed samples are moved to glyphs/_quarantine/<LETTER>/ rather than deleted,
-so a wrong call can be undone.
-"""
-
 from __future__ import annotations
 
 import argparse

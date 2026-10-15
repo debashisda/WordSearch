@@ -1,18 +1,4 @@
 #!/usr/bin/env python3
-"""Open the game and press through to a playable board.
-
-    python scripts/launch_game.py
-    python scripts/launch_game.py --restart          # force-stop first
-    python scripts/launch_game.py --package com.other.game
-
-Launching alone is not enough: the app shows a splash, then a loading screen
-for several seconds, then a main menu that has to be pressed before a board
-exists. This waits for each in turn and reports what it sees.
-
-`run.py --launch` does the same thing before it starts playing, so this script
-is mainly for checking the sequence works on your device.
-"""
-
 from __future__ import annotations
 
 import argparse

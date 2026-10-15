@@ -1,20 +1,4 @@
 #!/usr/bin/env python3
-"""Measure where the time per word actually goes on your setup.
-
-    python scripts/benchmark.py
-
-Answers three questions:
-
-  * is the cable (or port) the bottleneck?
-  * is PNG or raw capture faster on this phone?
-  * how much is `adb shell input swipe` costing?
-
-That last one is usually the surprise. `input` is a Java program, so Android
-starts a JVM for every single call. On many devices that is most of a second
-before the drag even begins, which no cable can fix — the uiautomator2 backend
-is what removes it, because it talks to an agent already running on the phone.
-"""
-
 from __future__ import annotations
 
 import statistics

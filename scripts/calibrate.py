@@ -1,19 +1,4 @@
 #!/usr/bin/env python3
-"""One-time check that the device is reachable and the board reads correctly.
-
-    python scripts/calibrate.py
-    python scripts/calibrate.py shot.png --save
-
-Detection is automatic and re-runs on every level, so this is a confidence
-check rather than a setup step you must complete. It reports the panel, the
-lattice, the letters and the word list, and with --save pins the detected
-geometry into config.json for the rare case where auto-detection picks wrong.
-
-If cells come back as '?', the glyph library has not seen those letters yet.
-Either play a level (confirmed words label their own cells automatically) or
-run scripts/label_glyphs.py to type them in.
-"""
-
 from __future__ import annotations
 
 import argparse

@@ -1,14 +1,4 @@
 #!/usr/bin/env python3
-"""Offline end-to-end test. No phone needed.
-
-    python scripts/selftest.py <frame.png> [<frame2.png> ...]
-
-Runs capture -> geometry -> glyphs -> board -> solver -> gesture planning
-against saved frames and prints what would be sent to the device. Use it to
-check a new build of the game, a new screen size, or a change to the pipeline
-without touching a device.
-"""
-
 from __future__ import annotations
 
 import sys

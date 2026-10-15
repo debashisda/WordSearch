@@ -1,20 +1,4 @@
 #!/usr/bin/env python3
-"""Teach the glyph library new letters.
-
-    python scripts/label_glyphs.py                 from the device
-    python scripts/label_glyphs.py shot.png        from a saved frame
-    python scripts/label_glyphs.py shot.png --only-unknown
-
-Writes a contact sheet to debug/to_label.png showing the grid with row and
-column numbers, then asks you to type the letters row by row. Each labelled
-cell is stored as glyphs/<LETTER>/<hash>.png.
-
-You will usually not need this. A word the bot successfully finds labels every
-cell it passes through, so the alphabet fills itself in during normal play.
-Reach for this script to bootstrap a brand-new install, or when a rare letter
-keeps coming back as '?'.
-"""
-
 from __future__ import annotations
 
 import argparse

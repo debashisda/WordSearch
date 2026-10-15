@@ -1,14 +1,4 @@
 #!/usr/bin/env python3
-"""Draw what the detector sees. The first thing to run when something is off.
-
-    python scripts/debug_view.py                 grab from the device
-    python scripts/debug_view.py shot.png        use a saved frame
-
-Writes debug/debug.png: the panel outline, the cell lattice, the letter read
-from each cell, the word pills with their found state, and arrows for every
-placement the solver found.
-"""
-
 from __future__ import annotations
 
 import sys
