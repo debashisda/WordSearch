@@ -1,0 +1,4 @@
+opencv-python>=4.9,<6  
+numpy>=1.26                
+uiautomator2>=3.0
+rich>=13.0
