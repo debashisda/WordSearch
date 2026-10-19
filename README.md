@@ -1,4 +1,4 @@
-# WoordSearch
+# WordSearch
 
 Solves an Android Word Search game over ADB. Screenshot in, multi-point drag out, verified after every move.
 
