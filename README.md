@@ -1,7 +1,6 @@
-# wordsearch-bot
+# WoordSearch
 
-Solves an Android Word Search game over ADB. Screenshot in, multi-point drag
-out, verified after every move.
+Solves an Android Word Search game over ADB. Screenshot in, multi-point drag out, verified after every move.
 
 ```
 screencap ──► geometry ──► glyphs ──► board ──► solver ──► player ──► swipe

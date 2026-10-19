@@ -45,19 +45,28 @@ def teach(device, lib: GlyphLibrary, board, words) -> int:
     print(f"  learned {learned} new glyph sample(s) from {len(placements)} word(s)")
     if unplaced:
         print(f"  could not place from your list: {', '.join(unplaced)}")
-    print(f"  library now {len(lib)} samples, {len(lib.letters)}/26 letters"
-          + (f" (missing {''.join(lib.missing)})" if lib.missing else ""))
+    print(
+        f"  library now {len(lib)} samples, {len(lib.letters)}/26 letters"
+        + (f" (missing {''.join(lib.missing)})" if lib.missing else "")
+    )
     return learned
 
 
-def solve_level(device, lib: GlyphLibrary, cfg: Config, dry_run: bool,
-                debug: bool = False, learn: bool = True,
-                words: list[str] | None = None,
-                lexicon: Lexicon | None = None,
-                no_batch: bool = False):
+def solve_level(
+    device,
+    lib: GlyphLibrary,
+    cfg: Config,
+    dry_run: bool,
+    debug: bool = False,
+    learn: bool = True,
+    words: list[str] | None = None,
+    lexicon: Lexicon | None = None,
+    no_batch: bool = False,
+):
 
-    board = read_board_stable(device, lib, grid=cfg.pinned_grid(),
-                              frames=cfg.consensus_frames)
+    board = read_board_stable(
+        device, lib, grid=cfg.pinned_grid(), frames=cfg.consensus_frames
+    )
     print(f"  {board.grid}")
     print(f"  {board}")
     print("  " + board.grid_text().replace("\n", "\n  "))
@@ -65,27 +74,35 @@ def solve_level(device, lib: GlyphLibrary, cfg: Config, dry_run: bool,
     if words:
         print(f"  using the word list you supplied: {', '.join(words)}")
         teach(device, lib, board, words)
-        board = read_board_stable(device, lib, grid=board.grid,
-                                  frames=cfg.consensus_frames)
+        board = read_board_stable(
+            device, lib, grid=board.grid, frames=cfg.consensus_frames
+        )
         print("  re-read after learning:")
         print("  " + board.grid_text().replace("\n", "\n  "))
 
     # Work out what any unknown glyphs actually are, using the word list plus
     # the fact that a refused glyph cannot be a letter the library holds.
     if board.tokens and lexicon is not None and lexicon.available:
-        board, got, n = auto_resolve(device.screencap(), board, lib, lexicon,
-                                     learn=learn, verbose=True)
+        board, got, n = auto_resolve(
+            device.screencap(), board, lib, lexicon, learn=learn, verbose=True
+        )
         if got:
-            print(f"  identified {''.join(sorted(got))} on its own"
-                  + (f"; learned {n} glyph sample(s)" if n else ""))
+            print(
+                f"  identified {''.join(sorted(got))} on its own"
+                + (f"; learned {n} glyph sample(s)" if n else "")
+            )
             print("  " + board.grid_text().replace("\n", "\n  "))
 
     if board.tokens:
-        print(f"  {len(board.tokens)} glyph(s) still unidentified; playing "
-              f"through them as position tokens")
+        print(
+            f"  {len(board.tokens)} glyph(s) still unidentified; playing "
+            f"through them as position tokens"
+        )
         if lib.missing:
-            print(f"  library is missing: {''.join(lib.missing)}  "
-                  f"(these fill in as words are found, or pass --words once)")
+            print(
+                f"  library is missing: {''.join(lib.missing)}  "
+                f"(these fill in as words are found, or pass --words once)"
+            )
 
     todo = [w.symbols for w in board.words if not w.found]
     if not todo:
@@ -100,16 +117,22 @@ def solve_level(device, lib: GlyphLibrary, cfg: Config, dry_run: bool,
     if unplaced:
         still: list[str] = []
         for text in unplaced:
-            entry = next((w for w in board.words
-                          if w.text == text and not w.found), None)
-            fixed = (repair_unplaced(list(entry.symbols), board.letters, lexicon)
-                     if entry is not None else None)
+            entry = next(
+                (w for w in board.words if w.text == text and not w.found), None
+            )
+            fixed = (
+                repair_unplaced(list(entry.symbols), board.letters, lexicon)
+                if entry is not None
+                else None
+            )
             if fixed is None:
                 still.append(text)
                 continue
             symbols, placement = fixed
-            print(f"    {text} is not in the grid; the grid reads it as "
-                  f"{''.join(symbols)}")
+            print(
+                f"    {text} is not in the grid; the grid reads it as "
+                f"{''.join(symbols)}"
+            )
             # Correct the board's own reading so the pill is matched, verified
             # and learned from exactly like a word that read cleanly.
             entry.symbols = list(symbols)
@@ -123,6 +146,7 @@ def solve_level(device, lib: GlyphLibrary, cfg: Config, dry_run: bool,
 
     if debug:
         from scripts.debug_view import annotate
+
         annotate(device.screencap(), board, placements, "debug/level.png")
         print("  wrote debug/level.png")
 
@@ -130,10 +154,16 @@ def solve_level(device, lib: GlyphLibrary, cfg: Config, dry_run: bool,
         print("  dry run: no gestures sent")
         return (not unplaced), board
 
-    results, final, complete = play_board(device, lib, board, placements,
-                                          learn=learn, settle=cfg.settle,
-                                          gap=cfg.gap,
-                                          batch=cfg.batch and not no_batch)
+    results, final, complete = play_board(
+        device,
+        lib,
+        board,
+        placements,
+        learn=learn,
+        settle=cfg.settle,
+        gap=cfg.gap,
+        batch=cfg.batch and not no_batch,
+    )
     failed = [r.placement.word for r in results if not r.ok]
     if failed:
         print(f"  did not register: {', '.join(failed)}")
@@ -142,38 +172,63 @@ def solve_level(device, lib: GlyphLibrary, cfg: Config, dry_run: bool,
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="Word Search bot")
-    ap.add_argument("--levels", type=int, default=1,
-                    help="how many levels to play (default 1). Use 0 to keep "
-                         "going until you press Ctrl-C.")
-    ap.add_argument("--forever", action="store_true",
-                    help="same as --levels 0")
+    ap.add_argument(
+        "--levels",
+        type=int,
+        default=1,
+        help="how many levels to play (default 1). Use 0 to keep "
+        "going until you press Ctrl-C.",
+    )
+    ap.add_argument("--forever", action="store_true", help="same as --levels 0")
     ap.add_argument("--once", action="store_true", help="same as --levels 1")
-    ap.add_argument("--dry-run", action="store_true",
-                    help="read and solve but send no gestures")
-    ap.add_argument("--debug", action="store_true",
-                    help="write annotated frames to debug/")
+    ap.add_argument(
+        "--dry-run", action="store_true", help="read and solve but send no gestures"
+    )
+    ap.add_argument(
+        "--debug", action="store_true", help="write annotated frames to debug/"
+    )
     ap.add_argument("--serial", default=None, help="adb device serial")
     ap.add_argument("--backend", default=None, choices=["auto", "u2", "adb"])
-    ap.add_argument("--adb", default=None, metavar="PATH",
-                    help="path to adb binary (default: 'adb' on system PATH)")
+    ap.add_argument(
+        "--adb",
+        default=None,
+        metavar="PATH",
+        help="path to adb binary (default: 'adb' on system PATH)",
+    )
     ap.add_argument("--config", default="config.json")
-    ap.add_argument("--no-learn", action="store_true",
-                    help="do not add confirmed glyphs to the library")
-    ap.add_argument("--launch", action="store_true",
-                    help="open the game first and press through its menu")
-    ap.add_argument("--restart", action="store_true",
-                    help="with --launch, force-stop the app first")
-    ap.add_argument("--no-batch", action="store_true",
-                    help="verify each word as it is played instead of dragging "
-                         "them all and checking once (slower, but isolates a "
-                         "misbehaving drag)")
-    ap.add_argument("--no-lexicon", action="store_true",
-                    help="do not use the bundled word list to identify "
-                         "unknown glyphs")
-    ap.add_argument("--words", nargs="+", metavar="WORD",
-                    help="the level's words, typed in. Resolves glyphs the "
-                         "library does not know and learns them permanently. "
-                         "Applies to the first level only.")
+    ap.add_argument(
+        "--no-learn",
+        action="store_true",
+        help="do not add confirmed glyphs to the library",
+    )
+    ap.add_argument(
+        "--launch",
+        action="store_true",
+        help="open the game first and press through its menu",
+    )
+    ap.add_argument(
+        "--restart", action="store_true", help="with --launch, force-stop the app first"
+    )
+    ap.add_argument(
+        "--no-batch",
+        action="store_true",
+        help="verify each word as it is played instead of dragging "
+        "them all and checking once (slower, but isolates a "
+        "misbehaving drag)",
+    )
+    ap.add_argument(
+        "--no-lexicon",
+        action="store_true",
+        help="do not use the bundled word list to identify " "unknown glyphs",
+    )
+    ap.add_argument(
+        "--words",
+        nargs="+",
+        metavar="WORD",
+        help="the level's words, typed in. Resolves glyphs the "
+        "library does not know and learns them permanently. "
+        "Applies to the first level only.",
+    )
     args = ap.parse_args()
 
     cfg = Config.load(args.config)
@@ -191,26 +246,36 @@ def main() -> int:
         print(f"device error: {e}", file=sys.stderr)
         return 2
 
-    lib = GlyphLibrary(cfg.glyph_dir, min_score=cfg.min_score,
-                       margin=cfg.match_margin, aspect_tol=cfg.aspect_tol,
-                       use_structure=cfg.use_structure)
+    lib = GlyphLibrary(
+        cfg.glyph_dir,
+        min_score=cfg.min_score,
+        margin=cfg.match_margin,
+        aspect_tol=cfg.aspect_tol,
+        use_structure=cfg.use_structure,
+    )
     lexicon = None if args.no_lexicon else Lexicon(cfg.word_list)
     print(f"device {serial} via {device.backend} backend")
     try:
-        device.screencap()          # benchmarks raw vs png once
+        device.screencap()  # benchmarks raw vs png once
         if getattr(device, "_capture_timings", None):
-            bits = ", ".join(f"{k} {v * 1000:.0f}ms"
-                             for k, v in sorted(device._capture_timings.items()))
+            bits = ", ".join(
+                f"{k} {v * 1000:.0f}ms"
+                for k, v in sorted(device._capture_timings.items())
+            )
             print(f"screen capture: using {device._capture} ({bits})")
     except DeviceError as e:
         print(f"device error: {e}", file=sys.stderr)
         return 2
-    print(f"glyph library: {len(lib)} samples covering "
-          f"{len(lib.letters)}/26 letters"
-          + (f" (missing {''.join(lib.missing)})" if lib.missing else ""))
+    print(
+        f"glyph library: {len(lib)} samples covering "
+        f"{len(lib.letters)}/26 letters"
+        + (f" (missing {''.join(lib.missing)})" if lib.missing else "")
+    )
     if lexicon is not None and lexicon.available:
-        print(f"lexicon: {len(lexicon)} words — unknown glyphs will be "
-              f"identified automatically")
+        print(
+            f"lexicon: {len(lexicon)} words — unknown glyphs will be "
+            f"identified automatically"
+        )
 
     forever = levels == 0
     if forever:
@@ -222,21 +287,31 @@ def main() -> int:
             return 2
 
     cleared = 0
-    n = 0                 # levels started
-    attempt = 0           # attempts at the current level
+    n = 0  # levels started
+    attempt = 0  # attempts at the current level
     try:
         while forever or n < levels:
             if attempt == 0:
                 n += 1
-            banner(f"Level {n}" + ("" if forever else f" of {levels}")
-                   + (f" (attempt {attempt + 1})" if attempt else ""))
+            banner(
+                f"Level {n}"
+                + ("" if forever else f" of {levels}")
+                + (f" (attempt {attempt + 1})" if attempt else "")
+            )
             try:
                 done, last = solve_level(
-                    device, lib, cfg, args.dry_run, args.debug,
+                    device,
+                    lib,
+                    cfg,
+                    args.dry_run,
+                    args.debug,
                     learn=not args.no_learn,
                     words=[w.upper() for w in args.words]
-                    if (args.words and n == 1 and attempt == 0) else None,
-                    lexicon=lexicon, no_batch=args.no_batch)
+                    if (args.words and n == 1 and attempt == 0)
+                    else None,
+                    lexicon=lexicon,
+                    no_batch=args.no_batch,
+                )
             except GeometryError as e:
                 print(f"  could not read the board: {e}")
                 break
@@ -261,8 +336,12 @@ def main() -> int:
                 break
 
             print("  advancing to the next level...")
-            if wait_for_new_board(device, lib, last, poll=cfg.poll,
-                                  advance_tap=cfg.advance_tap) is None:
+            if (
+                wait_for_new_board(
+                    device, lib, last, poll=cfg.poll, advance_tap=cfg.advance_tap
+                )
+                is None
+            ):
                 print("  the next level did not appear; stopping")
                 break
     except KeyboardInterrupt:
@@ -271,8 +350,10 @@ def main() -> int:
     attempted = n
 
     print(f"\ncleared {cleared} of {attempted} level(s) attempted")
-    print(f"glyph library now {len(lib)} samples, {len(lib.letters)}/26 letters"
-          + (f" (missing {''.join(lib.missing)})" if lib.missing else " — complete"))
+    print(
+        f"glyph library now {len(lib)} samples, {len(lib.letters)}/26 letters"
+        + (f" (missing {''.join(lib.missing)})" if lib.missing else " — complete")
+    )
     return 0
 
 
